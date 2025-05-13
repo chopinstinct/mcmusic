@@ -17,7 +17,7 @@ class MCTSnode:
 
         child = MCTSnode(features=self.features, genre=genre, parent=self)
         self.children.append(child)
-        self.exploredGenres(genre)
+        self.exploredGenres.add(genre)
 
         return child
     
@@ -39,7 +39,7 @@ class MCTSnode:
         # returns true or false
         return len(self.children) == 0
     
-    def allPossibleExploredGenresFromChild (self, allGenres = None):
+    def allGenresExplored (self, allGenres = None):
         
         if allGenres is None: # handeling is allGenres is not given
 
@@ -87,8 +87,8 @@ class MCTSnode:
 
             for child in self.children:
                 # 1 to ensure no divide by 0
-                visits = max(1, child.visits)
-                score = child.totalReward / visits
+                visit = max(1, child.visits)
+                score = child.totalReward / visit
 
                 if score > bestScore:
                     bestScore = score
@@ -101,7 +101,7 @@ class MCTSnode:
             bestScore = float('-inf')
 
             for child in self.children:
-                score = child.UCBscore(exploarationWeight)
+                score = child.UCBScore(exploarationWeight)
 
                 if score > bestScore:
                     bestScore = score
