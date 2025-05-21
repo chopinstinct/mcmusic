@@ -1,0 +1,5 @@
+numpy
+pyaudio
+librosa
+scikit-learn
+matplotlib
