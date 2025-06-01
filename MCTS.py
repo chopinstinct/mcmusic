@@ -75,7 +75,7 @@ def mcts_search(num_iterations=50, print_added_nodes=False, print_rollout_result
     print("Action is :\n {}".format(action))
     return action
 
-# Example usage
+# Example usage (will probably only use one of these with more simulaitions)
 if __name__ == "__main__":
     mcts_search(10, print_added_nodes=True, print_final_tree=True, nodes_to_print=float("inf"))
     mcts_search(20, print_added_nodes=True, print_final_tree=True, nodes_to_print=float("inf"))
