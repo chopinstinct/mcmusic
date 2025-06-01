@@ -20,7 +20,7 @@ class MCTSNode:
         """
         self.state = state  # The musical sequence
         self.parent = parent  # Parent node
-        self.genre = featuresList
+        self.genre = featuresList # Musical features of the current genre
         self.action = action  # The note parameters that led to this state
         self.children = {}  # Successors of this node
         self.visits = 0  # Number of times this node has been visited
@@ -47,7 +47,7 @@ class MCTSNode:
 
     def _get_successor_states(self):
         """Get successor states from external function"""
-        # This should be implemented to call your external function
+        # This should be implemented to call the external function
         # that generates possible next musical states
         return []
 
@@ -104,7 +104,7 @@ class MCTSNode:
         if self.visits > 0:
             exploit_term = self.get_exploit_term()
             explore_term = self.get_explore_term(self.parent,c)
-            return exploit_term + explore_term # will eventually be normalized
+            return exploit_term + explore_term # Will eventually be changed so one term doesn't dominate the other
         else:
             return default
 
@@ -135,10 +135,11 @@ class MCTSNode:
 
     def _is_terminal(self):
         """Check if this node represents a terminal state"""
-        # A state is terminal if it has reached the desired length
-        # or forms a complete musical phrase
-        if self.state is None:
-            return False
+        # A node is terminal if it has no possible successors
+        # This means we've reached the end of possible musical sequences
+        # This info should come from the external function that generates possible next musical states
+        if self._possible_songs is None:
+            return True
             
         # TODO: Implement length check
         # For now, return False to allow continuous generation
