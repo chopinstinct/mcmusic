@@ -1,53 +1,81 @@
 import numpy as np
-import random
+from tqdm.notebook import tqdm
+import math
+import queue
 from MCTSNode import MCTSNode
+import random
 
-class MCTS:
-    """
-    Monte Carlo Tree Search class used for the Genre Search
-    """
+def tree_policy(node):
+    """Tree policy for MCTS - implements the selection and expansion phases"""
+    if node.get_score() is not None:
+        return node
+    elif len(node.children) < len(node.get_possible_songs()):
+        return node.expand()
+    else:
+        return tree_policy(best_child(node))
 
-    def __init__(self, exploration_weight=1.0):
-        self.exploration_weight = exploration_weight
+def best_child(node, c=1):
+    """Select the best child node using UCB formula"""
+    score = float('-inf')
+    best_node = None
+    for child in node.children.values():
+        if score < child.get_ucb(c):
+            score = child.get_ucb(c)
+            best_node = child
+    return best_node
 
-    def run_search(self, root_node, genre_handler, num_simulations):
-        for _ in range(num_simulations):
-            node = self.select_next_node(root_node, genre_handler)
-            score = genre_handler.try_genre(node)
-            self.backpropagate(node, score)
-        return genre_handler.pick_best_genre(root_node)
+def backup(node, score):
+    """Backpropagate the score up the tree using iteration instead of recursion"""
+    cur = node
+    while cur is not None:
+        cur.count += 1
+        cur.score += score
+        cur = cur.parent
 
-    def select_next_node(self, node, genre_handler):
-        if len(node.children) < len(genre_handler.genre_list):
-            for genre in genre_handler.genre_list:
-                if genre not in node.children:
-                    new_features = genre_handler.modify_features(node.state, genre)
-                    new_node = MCTSNode(state=new_features, parent=node)
-                    node.add_child(genre, new_node)
-                    return new_node
-        return self.select_with_ucb(node)
+def default_policy(node, print_rollout_result = False):
+  score = node.get_score()
+  if score is not None:
+    if print_rollout_result:
+      print(node.hash)
+      print(score)
+    return score
+  else:
+    successors = node.get_possible_songs()
+    successor_random = random.choice(successors)
+    temp_node = MCTSNode(successor_random, None)
+    return default_policy(temp_node, print_rollout_result)
 
-    def select_with_ucb(self, node):
-        log_visits = np.log(node.visits) if node.visits > 0 else 0
-        best_score = float('-inf')
-        best_child = None
+def mcts_search(num_iterations=50, print_added_nodes=False, print_rollout_result=False, print_final_tree=False, nodes_to_print=None):
+    """Run MCTS search for the specified number of iterations"""
+    start_node = MCTSNode()
+    
+    for _ in tqdm(range(num_iterations)):
+        # Selection and expansion
+        v = tree_policy(start_node)
+        if print_added_nodes:
+            print(v)
+            print("Adding new node {} with parent {}".format(v.hash, v.parent.hash if v.parent else "None"))
+            
+        # Simulation
+        value = default_policy(v, print_rollout_result)
+        
+        # Backpropagation
+        backup(v, value)
+    
+    # Get best action
+    best_node = best_child(start_node, 0)
+    if best_node is None:
+        return None
+        
+    action = best_node.action
+    if print_final_tree:
+        start_node.print_subtree(nodes_to_print)
+    print("Action is :\n {}".format(action))
+    return action
 
-        for child in node.children.values():
-            if child.visits == 0:
-                score = float('inf')
-            else:
-                average = child.score / child.visits
-                explore_bonus = self.exploration_weight * np.sqrt(log_visits / child.visits)
-                score = average + explore_bonus
-
-            if score > best_score:
-                best_score = score
-                best_child = child
-
-        return best_child
-
-    def backpropagate(self, node, score):
-        while node is not None:
-            node.visits += 1
-            node.score += score
-            node = node.parent
+# Example usage
+if __name__ == "__main__":
+    mcts_search(10, print_added_nodes=True, print_final_tree=True, nodes_to_print=float("inf"))
+    mcts_search(20, print_added_nodes=True, print_final_tree=True, nodes_to_print=float("inf"))
+    mcts_search(20, print_final_tree=True, nodes_to_print=float("inf"))
+    mcts_search(20, print_final_tree=True, print_rollout_result=True)
