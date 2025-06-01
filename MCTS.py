@@ -28,18 +28,20 @@ def backup(node, score):
     """Backpropagate the score up the tree using iteration instead of recursion"""
     cur = node
     while cur is not None:
-        cur.count += 1
+        cur.visits += 1
         cur.score += score
         cur = cur.parent
 
-def default_policy(node, print_rollout_result = False):
-  score = node.get_score()
-  if score is not None:
-    if print_rollout_result:
-      print(node.hash)
-      print(score)
-    return score
-  else:
+def default_policy(node, print_rollout_result=False):
+    """Simulate from current node to a terminal state"""
+    score = node.get_score()
+    if score is not None:
+        if print_rollout_result:
+            print(node.hash)
+            print(score)
+        return score
+    
+    # Get possible successors
     successors = node.get_possible_songs()
     successor_random = random.choice(successors)
     temp_node = MCTSNode(successor_random, None)

@@ -49,7 +49,7 @@ class MCTSNode:
         """Get successor states from external function"""
         # This should be implemented to call your external function
         # that generates possible next musical states
-        pass
+        return []
 
     def add_child(self, successor):
         """Add a child node to this node"""
@@ -76,16 +76,32 @@ class MCTSNode:
         return None
 
     def get_explore_term(self, parent, c=1):
-        if self.parent is not None:
-            return c * (2 * math.log(parent.count) / self.count) ** (1 / 2)
+        """Calculate the exploration term for UCB"""
+        if self.parent is not None and self.visits > 0:
+            return c * (2 * math.log(parent.visits) / self.visits) ** (1 / 2)
         else:
             return 0
-
     def get_exploit_term(self):
-        return (0.8 * (self.genre_score) + 0.2 * (get_quality(self.midi, self.features))) / self.count
+        """Calculate the exploitation term for UCB"""
+        if self.visits == 0:
+            return 0
+            
+        # For non-terminal states, use a simple average of accumulated scores
+        return self.score / self.visits
 
-    def get_ucb(self, c=1, default=6):
-        if self.count:
+    def _get_genre_score(self):
+        """Get the genre score for this node"""
+        # TODO: Implement genre scoring
+        return 0.5  # Placeholder
+
+    def _get_quality_score(self):
+        """Get the musical quality score for this node"""
+        # TODO: Implement quality scoring
+        return 0.5  # Placeholder
+
+    def get_ucb(self, c=1, default=float('inf')):
+        """Calculate the UCB value for this node"""
+        if self.visits > 0:
             exploit_term = self.get_exploit_term()
             explore_term = self.get_explore_term(self.parent,c)
             return exploit_term + explore_term # will eventually be normalized
@@ -93,6 +109,7 @@ class MCTSNode:
             return default
 
     def print_subtree(self, max_nodes=None):
+        """Print the subtree starting from this node"""
         if max_nodes is None:
             max_nodes = len(self.children) + 1
         print(f"\n\nPrinting the subtree starting from node {self.hash} up to a maximum of {max_nodes} nodes\n\n")
@@ -105,3 +122,24 @@ class MCTSNode:
             print(n)
             for key in n.children.keys():
                 q.put(n.children[key])
+
+    def get_score(self):
+        """Determine if this is a terminal state and return its score"""
+        # Only calculate detailed scores for terminal states
+        if self._is_terminal():
+            # Calculate final score based on musical quality and genre adherence
+            genre_score = self._get_genre_score()
+            quality_score = self._get_quality_score()
+            return 0.8 * genre_score + 0.2 * quality_score
+        return None
+
+    def _is_terminal(self):
+        """Check if this node represents a terminal state"""
+        # A state is terminal if it has reached the desired length
+        # or forms a complete musical phrase
+        if self.state is None:
+            return False
+            
+        # TODO: Implement length check
+        # For now, return False to allow continuous generation
+        return False
