@@ -28,3 +28,7 @@ def generate_continuation(
             'probability': prob #probability of the next token
         })
     return sequences
+
+# From here, I can either change this function and the model to
+# a) be trained on genre-specific data
+# b) use the genre classification model as a filter for the probabilities of each token
