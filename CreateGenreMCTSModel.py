@@ -9,7 +9,7 @@ def CreateGenreMCTSModel():
     """
     print("Starting genre model creation...")
 
-    data_path = "training_data"
+    data_path = "GTZAN/genres_split/train"
     featuresList = []
     labels = []
 

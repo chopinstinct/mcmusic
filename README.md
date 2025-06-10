@@ -1,9 +1,28 @@
 # mcmusic
 
+PREAMBLE
+
+This is a project by Pranav Dumpa, Siri Gunturi, Rithvik Harinath, Taran Singh, Nick Teeple, and Arianna Wilde. This is the implementation for a music classification project for the class CSC 480 at Cal Poly, instructed by Professor Rodrigo Canaan. This project is based on the following references:
+1. Ferreira, L. N., Mou, L., Whitehead, J., & Lelis, L. H. S. (2022, September 1). Controlling perceived emotion in symbolic music generation with Monte Carlo Tree Search. arXiv.org. https://arxiv.org/abs/2208.05162
+2. (PDF) automatic musical pattern feature extraction using convolutional neural network. (n.d.). https://www.researchgate.net/publication/44260643_Automatic_Musical_Pattern_Feature_Extraction_Using_Convolutional_Neural_Network 
+3. G. Tzanetakis, & P. Cook. (n.d.). Musical genre classification of Audio Signals. https://www.cs.cmu.edu/~gtzan/work/pubs/tsap02gtzan.pdf 
+4. Jvedarutvija. (2022, June 23). Music genre classification. Kaggle. https://www.kaggle.com/code/jvedarutvija/music-genre-classification 
+5.   Zhang, Y., & Li, T. (2025, March 20). Music genre classification with parallel convolutional neural networks and Capuchin search algorithm. Nature News. https://www.nature.com/articles/s41598-025-90619-7  
+6. Colin Raffel. "Learning-Based Methods for Comparing Sequences, with Applications to Audio-to-MIDI Alignment and Matching". PhD Thesis, 2016.
+
+DEPENDENCIES
+1. Install al dependencies found in requirements.txt by running the command "pip install -r requirements.txt" in your computer's terminal.
+2. Ensure python-tk is installed. This can be done using the corresponding command:
+    On macOS: brew install python-tk@3.10
+    Ubuntu/Debian: sudo apt-get install python3-tk
+    Windows: Usually comes with Python installation. If not then use "pip install tk"
+
 FOR THE MCTS RUN 
 1. CreateGenreMCTSModelL.py
 2. preprocess.py
 3. main.py
+
+To evaluate test data, run the script evaluate.py.
 
 THOSE INSTRUCTIONS WILL ACTIVATE THE GUI 
 
@@ -74,6 +93,8 @@ Increasing epochs
 Using more advanced architectures
 Expanding feature set
 Adding more genres
+
+The model's test accuracy can also be evaluated by running neural_net/confusion_matrix_script.py.
 
 ### Troubleshooting
 
