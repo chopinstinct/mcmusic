@@ -1,1 +1,14 @@
 # mcmusic
+
+FOR THE MCTS RUN 
+1. CreateGenreMCTSModelL.py
+2. preprocess.py
+3. main.py
+
+THOSE INSTRUCTIONS WILL ACTIVATE THE GUI 
+
+
+
+FOR THE NEURAL NET
+- RUN 1,2,3,6 TO TRAIN
+- RUN 7 TO PREDICT
