@@ -1,62 +1,92 @@
 import os
 import librosa
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    confusion_matrix,
-    ConfusionMatrixDisplay
-)
+from MusicGenreModelProcessor import MusicGenreModelProcessor
+import argparse
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
-import pickle
 
-DATASET_PATH = 'GTZAN/genres_processed'
+def test_model():
 
-x = []
-y = []
+    test_folder = 'GTZAN/genres_split/test'
+    print(f"Loading model from: {'genre_model.pkl'}")
+    processor = MusicGenreModelProcessor()
+    try:
+        processor.load('genre_model.pkl')
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return
 
-for genre in os.listdir(DATASET_PATH):
-    genre_path = os.path.join(DATASET_PATH, genre)
-    if os.path.isdir(genre_path):
-        for filename in os.listdir(genre_path):
-            file_path = os.path.join(genre_path, filename)
-            try:
-                audio, sr = librosa.load(file_path, sr=None)
-                mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=13)
-                mfccs_mean = np.mean(mfccs.T, axis=0)
-                x.append(mfccs_mean)
-                y.append(genre)
-            except Exception as e:
-                print(f"Error processing {file_path}: {e}")
+    y_true = []
+    y_pred = []
+    
+    results = {genre: {'correct': 0, 'total': 0} for genre in processor.genre_list}
+    
+    for genre in processor.genre_list:
+        genre_folder = os.path.join(test_folder, genre)
+        if not os.path.exists(genre_folder):
+            print(f"Warning: No folder found for {genre}")
+            continue
+            
+        print(f"\nTesting {genre} songs...")
+        
+        for file in os.listdir(genre_folder):
+            if file.endswith(('.mp3', '.wav')):
+                file_path = os.path.join(genre_folder, file)
+                try:
+                    audio_data, sr = librosa.load(file_path, sr=44100)
+                    
+                    features = processor.extract_features(audio_data, sr)
+                    
+                    prediction = processor.predict(features)
+                    predicted_genre = prediction['genre']
+                    
+                    y_true.append(genre)
+                    y_pred.append(predicted_genre)
+                    
+                    results[genre]['total'] += 1
+                    if predicted_genre == genre:
+                        results[genre]['correct'] += 1
+                    
+                    print(f"File: {file}")
+                    print(f"True genre: {genre}")
+                    print(f"Predicted: {predicted_genre}")
+                    print(f"Confidence scores: {prediction['confidence_scores']}")
+                    print("-" * 50)
+                    
+                except Exception as e:
+                    print(f"Error processing {file}: {e}")
+    
+    print("\nOverall Results:")
+    print("-" * 50)
+    total_correct = 0
+    total_files = 0
+    
+    for genre in processor.genre_list:
+        if results[genre]['total'] > 0:
+            accuracy = results[genre]['correct'] / results[genre]['total'] * 100
+            print(f"{genre}: {results[genre]['correct']}/{results[genre]['total']} correct ({accuracy:.1f}%)")
+            total_correct += results[genre]['correct']
+            total_files += results[genre]['total']
+    
+    if total_files > 0:
+        overall_accuracy = total_correct / total_files * 100
+        print(f"\nOverall accuracy: {overall_accuracy:.1f}% ({total_correct}/{total_files} correct)")
+        
+        print("\nGenerating confusion matrix...")
+        cm = confusion_matrix(y_true, y_pred, labels=processor.genre_list)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=processor.genre_list)
+        
+        plt.figure(figsize=(12, 8))
+        disp.plot(cmap='Blues')
+        plt.title('Confusion Matrix')
+        plt.xticks(rotation=45, ha='right')
+        plt.tight_layout()
+        plt.show()
 
-x = np.array(x)
-y = np.array(y)
+def main():
+    
+    test_model()
 
-class_names = np.unique(y)
-
-x_train, x_test, y_train, y_test = train_test_split(
-    x, y, test_size=0.2, random_state=42, stratify=y
-)
-
-# Load the trained model from pickle file
-with open('genre_model.pkl', 'rb') as f:
-    model = pickle.load(f)
-
-y_pred = model.predict(x_test)
-
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy: {accuracy:.2f}\n")
-
-print("Classification Report:")
-print(classification_report(y_test, y_pred, target_names=class_names))
-
-cm = confusion_matrix(y_test, y_pred, labels=class_names)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
-disp.plot(cmap=plt.cm.Blues)
-plt.title("Confusion Matrix")
-plt.xlabel("Predicted Label")
-plt.ylabel("True Label")
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
+if __name__ == "__main__":
+    main() 

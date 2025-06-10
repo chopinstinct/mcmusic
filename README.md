@@ -18,7 +18,7 @@ DEPENDENCIES
     Windows: Usually comes with Python installation. If not then use "pip install tk"
 
 FOR THE MCTS RUN 
-1. CreateGenreMCTSModelL.py
+1. CreateGenreMCTSModel.py
 2. preprocess.py
 3. main.py
 
