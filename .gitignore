@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+*.env
+
+# MIDI files
+*.mid
+
+# Dataset and output files
+df_filtered.csv
+lmd_matched/
+../GTZAN/genres_processed/
+
+# Model artifacts
+*.pkl
+*.h5
+
+# Local scripts (if you want to ignore these specific ones)
+zeval.py
+quality.py
+
